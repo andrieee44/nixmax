@@ -3,6 +3,10 @@
   languages.nix.enable = true;
 
   git-hooks.hooks = {
+    # Bash
+    shellcheck.enable = true;
+    shfmt.enable = true;
+
     # Markdown
     markdownlint = {
       enable = true;
