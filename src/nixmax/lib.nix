@@ -11,7 +11,7 @@ rec {
       qemuBin,
       system,
     }:
-    pkgs.callPackage ./main.nix {
+    pkgs.buildPackages.callPackage ./main.nix {
       inherit
         app
         hostCPU
@@ -35,7 +35,7 @@ rec {
       hostCPU = "x86_64";
       preRunShellScript = "";
       prompt = "localhost:~# ";
-      qemuBin = "${pkgs.qemu}/bin/qemu-system-x86_64";
+      qemuBin = "${pkgs.buildPackages.qemu}/bin/qemu-system-x86_64";
 
       loginExpectScript = ''
         expect "localhost login: "
@@ -63,10 +63,10 @@ rec {
     }).override
       {
         hostCPU = "aarch64";
-        qemuBin = "${pkgs.qemu}/bin/qemu-system-aarch64";
+        qemuBin = "${pkgs.buildPackages.qemu}/bin/qemu-system-aarch64";
 
         qemuArgs = {
-          bios = "${pkgs.qemu}/share/qemu/edk2-aarch64-code.fd";
+          bios = "${pkgs.buildPackages.qemu}/share/qemu/edk2-aarch64-code.fd";
           machine = "virt";
 
           cdrom = pkgs.fetchurl {
@@ -87,11 +87,11 @@ rec {
     }).override
       {
         hostCPU = "riscv64";
-        qemuBin = "${pkgs.qemu}/bin/qemu-system-riscv64";
+        qemuBin = "${pkgs.buildPackages.qemu}/bin/qemu-system-riscv64";
 
         qemuArgs = {
           machine = "virt,acpi=off";
-          drive = "file=${pkgs.qemu}/share/qemu/edk2-riscv-code.fd,if=pflash,format=raw,unit=0,readonly=on";
+          drive = "file=${pkgs.buildPackages.qemu}/share/qemu/edk2-riscv-code.fd,if=pflash,format=raw,unit=0,readonly=on";
 
           cdrom = pkgs.fetchurl {
             url = "https://dl-cdn.alpinelinux.org/alpine/v3.24/releases/riscv64/alpine-standard-3.24.1-riscv64.iso";

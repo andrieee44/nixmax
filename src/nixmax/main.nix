@@ -11,6 +11,7 @@
   system,
 }:
 let
+  inherit (pkgs) buildPackages;
   isHost = hostCPU == builtins.head (builtins.split "-" system);
 
   defaultArgs = {
@@ -33,7 +34,7 @@ let
     lib.cli.toCommandLine optionFormat (defaultArgs // qemuArgs)
   );
 
-  expectScript = pkgs.writeText "nixmax-expect-script" ''
+  expectScript = buildPackages.writeText "nixmax-expect-script" ''
     set timeout -1
 
     set commands {
@@ -53,16 +54,24 @@ let
         expect "${prompt}"
         send "echo ___NIXMAX_CMD_STATUS___=\$?\r"
         expect {
-          "___NIXMAX_CMD_STATUS___=0" {}
-          default { exit 1 }
+            -re {___NIXMAX_CMD_STATUS___=([0-9]+)} {
+              if {$expect_out(1,string) != "0"} {
+                exit 1
+              }
+            }
+            default { exit 1 }
         }
     }
 
     send "poweroff -f\r"
   '';
 in
-pkgs.runCommand "nixmax" { nativeBuildInputs = with pkgs; [ expect ]; } ''
-  ${preRunShellScript}
-  expect "${expectScript}"
-  touch "$out"
-''
+buildPackages.runCommand "nixmax"
+  {
+    nativeBuildInputs = [ buildPackages.expect ];
+  }
+  ''
+    ${preRunShellScript}
+    expect "${expectScript}"
+    touch "$out"
+  ''

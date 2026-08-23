@@ -52,30 +52,12 @@ supported architecture:
 Each of these takes `app`, `pkgs`, and `system`, and builds on sensible
 defaults (login prompt, QEMU binary, boot args, etc.) for that architecture.
 
-### Example (from this repo's flake)
-
-```nix
-checks.nixmax-alpine-aarch64 = nixmaxLib.nixmax-alpine-aarch64 {
-  inherit pkgs system;
-  app = lib.getExe pkgs.pkgsCross.aarch64-multiplatform.hello;
-};
-```
-
-This cross-compiles `hello` for `aarch64`, boots an aarch64 Alpine VM
-(using TCG emulation if the host isn't aarch64, or KVM if it is), runs `hello`
-inside it, and reports success or failure as a flake check.
-
 ### Custom configurations
 
 For more control, call `nixmax` directly and supply your own `hostCPU`,
 `qemuBin`, `qemuArgs`, `loginExpectScript`, `prompt`, and `preRunShellScript`.
 This lets you use a different base image, architecture, or login flow than the
 built-in Alpine variants.
-
-## Requirements
-
-- Nix with flakes enabled
-- QEMU (pulled in automatically via `pkgs`)
 
 ## License
 
