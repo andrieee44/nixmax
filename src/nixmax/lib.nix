@@ -2,7 +2,6 @@ rec {
   nixmax =
     {
       app,
-      hostCPU,
       loginExpectScript,
       pkgs,
       preRunShellScript,
@@ -10,17 +9,18 @@ rec {
       qemuArgs,
       qemuBin,
       system,
+      vmArch,
     }:
     pkgs.buildPackages.callPackage ./main.nix {
       inherit
         app
-        hostCPU
         loginExpectScript
         preRunShellScript
         prompt
         qemuArgs
         qemuBin
         system
+        vmArch
         ;
     };
 
@@ -32,10 +32,10 @@ rec {
     }:
     nixmax {
       inherit app pkgs system;
-      hostCPU = "x86_64";
       preRunShellScript = "";
       prompt = "localhost:~# ";
       qemuBin = "${pkgs.buildPackages.qemu}/bin/qemu-system-x86_64";
+      vmArch = "x86_64";
 
       loginExpectScript = ''
         expect "localhost login: "
@@ -62,8 +62,8 @@ rec {
       inherit app pkgs system;
     }).override
       {
-        hostCPU = "aarch64";
         qemuBin = "${pkgs.buildPackages.qemu}/bin/qemu-system-aarch64";
+        vmArch = "aarch64";
 
         qemuArgs = {
           bios = "${pkgs.buildPackages.qemu}/share/qemu/edk2-aarch64-code.fd";
@@ -86,8 +86,8 @@ rec {
       inherit app pkgs system;
     }).override
       {
-        hostCPU = "riscv64";
         qemuBin = "${pkgs.buildPackages.qemu}/bin/qemu-system-riscv64";
+        vmArch = "riscv64";
 
         qemuArgs = {
           machine = "virt,acpi=off";

@@ -1,64 +1,219 @@
 # nixmax
 
-**Nix + virtual MAchine + cross (x)** - run cross-compiled binaries inside a
-lightweight QEMU VM, driven entirely by Nix.
+## Name
 
-## What it does
+nixmax - NIX virtual MAchine cross (x)
 
-`nixmax` boots a minimal Alpine Linux VM in QEMU, mounts your Nix store into
-it read-only over 9p, runs a single app inside the VM, and captures its exit
-status. It's a way to test or execute cross-compiled binaries under a real
-kernel without needing a full NixOS VM test or a heavier VM solution.
+## Library
 
-Pre-built Alpine ISOs are provided out of the box for `x86_64`, `aarch64`, and
-`riscv64`, so most users don't need to build or configure anything beyond
-pointing at their app.
+Nix library with [flakes](https://nixos.wiki/wiki/Flakes) support.
 
-## Why
+## Synopsis
 
-- **`nixos-lib.runTest` / `runNixOSTest`** recompiles large parts of the
-system when cross-compiling, which is slow and wasteful just to run one binary
-under a kernel.
-- **Lima** VMs are fast to iterate with, but accumulate state over time,
-aren't reproducible, and have a heavier minimum footprint (startup time,
-memory) than is needed for a one-shot run. It also needs netboot/SSH to get an
-ISO in, which is slow.
-- **Containers** don't give you a real kernel, so anything relying on
-kernel-level features (not just userspace + binfmt) won't work.
+In your `flake.nix`:
 
-`nixmax` avoids all of this by downloading a premade Alpine ISO once and only
-compiling the app you actually want to run while still giving you a real
-kernel via QEMU.
+```nix
+inputs.nixmax.url = "github:andrieee44/nixmax";
+```
 
-## How it works
+### nixmax.lib.nixmax
 
-1. QEMU boots the Alpine ISO (with KVM acceleration when the host and guest
-CPU architectures match).
-2. Your Nix store is shared into the VM read-only via a 9p virtio mount.
-3. An `expect` script logs in and drives the VM: mounting the store, running
-your app, and checking its exit code via a shell echo/status marker.
-4. The VM powers off, and the whole thing succeeds or fails as a normal Nix
-derivation.
+```haskell
+nixmax.lib.nixmax :: {
+  app,
+  loginExpectScript,
+  pkgs,
+  preRunShellScript,
+  prompt,
+  qemuArgs,
+  qemuBin,
+  system,
+  vmArch,
+} -> Derivation
+```
 
-## Usage
+### nixmax.lib.nixmax-alpine-x86_64
 
-The library is exposed as `nixmax`, plus ready-made variants for each
-supported architecture:
+```haskell
+nixmax.lib.nixmax-alpine-x86_64 :: {
+  app,
+  pkgs,
+  system,
+} -> Derivation
+```
 
-- `nixmax-alpine-x86_64`
-- `nixmax-alpine-aarch64`
-- `nixmax-alpine-riscv64`
+### nixmax.lib.nixmax-alpine-aarch64
 
-Each of these takes `app`, `pkgs`, and `system`, and builds on sensible
-defaults (login prompt, QEMU binary, boot args, etc.) for that architecture.
+```haskell
+nixmax.lib.nixmax-alpine-aarch64 :: {
+  app,
+  pkgs,
+  system,
+} -> Derivation
+```
 
-### Custom configurations
+### nixmax.lib.nixmax-alpine-riscv64
 
-For more control, call `nixmax` directly and supply your own `hostCPU`,
-`qemuBin`, `qemuArgs`, `loginExpectScript`, `prompt`, and `preRunShellScript`.
-This lets you use a different base image, architecture, or login flow than the
-built-in Alpine variants.
+```haskell
+nixmax.lib.nixmax-alpine-riscv64 :: {
+  app,
+  pkgs,
+  system,
+} -> Derivation
+```
 
-## License
+## Description
 
-AGPL-3.0. See [LICENSE](./LICENSE).
+nixmax is a [Nix flake](https://nixos.wiki/wiki/Flakes) library for testing
+cross compiled apps that need kernel features, while avoiding the expensive
+cost of cross-compiling [QEMU](https://www.qemu.org/) and its dependencies
+([`runNixOSTest`](https://noogle.dev/f/pkgs/testers/runNixOSTest/)), and
+avoiding the state accumulation of [Lima](https://lima-vm.io/) VMs, which also
+suffers from unreproducible results and heavy memory/CPU requirements on
+startup (netboot ISO, SSH, etc.), taking quite a while to get running.
+
+If your app does not need kernel features, is not cross compiled, try using
+QEMU userspace and `binfmt`, or `runNixOSTest` with containers instead. If
+your system can comfortably run a Lima VM, you can run a Lima VM for quick
+iteration and use this library as the final check, since this is
+reproducible.
+
+Basically, this library offloads the compilation to an already compiled ISO.
+For convenience, Alpine ISOs for three different architectures are already
+configured for you. If you want a custom ISO, use the general purpose
+function `nixmax`, or override the Alpine ISO with your preferred
+architecture, which has already figured out the correct arguments to boot
+that architecture.
+
+The end result is that, similar to Lima, you download an ISO, but the host
+does not perform any cross compilation related to setting up the virtual
+machine, only the app itself is cross compiled, which saves a lot of time.
+[QEMU](https://www.qemu.org/) itself is not cross compiled and, for this
+reason, has a very high chance of already being in the cache. This library
+therefore optimizes for cache hits, and you can get away with a small memory
+footprint because it is just a standard ISO which boots fast and needs
+little to run.
+
+## Parameters
+
+### app
+
+app is the path to run.
+
+```nix
+"${pkgs.hello}/bin/hello"
+```
+
+```nix
+lib.getExe pkgs.hello
+```
+
+### loginExpectScript
+
+loginExpectScript is the [Expect](https://core.tcl-lang.org/expect/index)
+snippet to run for logging in.
+
+```nix
+# loginExpectScript used in Alpine ISOs
+''
+  expect "localhost login: "
+  send "root\r"
+''
+```
+
+### pkgs
+
+pkgs is your [Nixpkgs](https://github.com/NixOS/nixpkgs) instance.
+
+```nix
+nixpkgs.legacyPackages.x86_64-linux
+```
+
+### preRunShellScript
+
+preRunShellScript is an escape hatch shell script snippet that runs before
+starting [Expect](https://core.tcl-lang.org/expect/index) and
+[QEMU](https://www.qemu.org/). Use it when `qemuArgs` is not enough.
+
+### prompt
+
+prompt is the expected string after logging in to the ISO, used by
+[Expect](https://core.tcl-lang.org/expect/index).
+
+```nix
+# prompt used in Alpine ISOs
+"localhost:~# "
+```
+
+### qemuArgs
+
+qemuArgs is used to pass arguments to the
+[QEMU](https://www.qemu.org/docs/master/system/invocation.html) binary.
+
+```nix
+{
+  machine = "q35"; # For x86_64
+
+  cdrom = pkgs.fetchurl {
+    url = "your-x86_64-iso-url";
+    hash = "";
+  };
+}
+```
+
+### qemuBin
+
+qemuBin is your [QEMU](https://www.qemu.org/) binary to be executed.
+
+```nix
+"${pkgs.qemu}/bin/qemu-system-x86_64"
+```
+
+### system
+
+system is your current
+[Nix system](https://nix.dev/manual/nix/stable/language/builtins.html#builtins-currentSystem)
+identifier.
+
+```nix
+builtins.currentSystem
+```
+
+### vmArch
+
+vmArch is the ISO's architecture.
+
+```nix
+"x86_64"
+```
+
+## Return Value
+
+These functions return a
+[derivation](https://nix.dev/manual/nix/stable/language/derivations.html)
+which runs the test when realized. The derivation fails when the app fails
+to return a success status code.
+
+## Examples
+
+See [`flake.nix`](flake.nix).
+
+## Reporting Bugs
+
+Open a GitHub issue at
+[github.com/andrieee44/nixmax](https://github.com/andrieee44/nixmax/issues).
+
+## Copyright
+
+See [`LICENSE`](LICENSE). Uses
+[AGPLv3 or later](https://www.gnu.org/licenses/agpl-3.0.html).
+
+## See Also
+
+- [Nix](https://nixos.org/)
+- [Nixpkgs](https://github.com/NixOS/nixpkgs)
+- [Nix flakes](https://nixos.wiki/wiki/Flakes)
+- [QEMU](https://www.qemu.org/)
+- [Expect](https://core.tcl-lang.org/expect/index)
+- [Lima](https://lima-vm.io/)
+- [GitHub repository](https://github.com/andrieee44/nixmax)

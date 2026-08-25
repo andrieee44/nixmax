@@ -1,6 +1,5 @@
 {
   app,
-  hostCPU,
   lib,
   loginExpectScript,
   pkgs,
@@ -9,10 +8,11 @@
   qemuArgs,
   qemuBin,
   system,
+  vmArch,
 }:
 let
   inherit (pkgs) buildPackages;
-  isHost = hostCPU == builtins.head (builtins.split "-" system);
+  isHost = vmArch == builtins.head (builtins.split "-" system);
 
   defaultArgs = {
     boot = "d";
