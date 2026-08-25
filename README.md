@@ -1,14 +1,14 @@
 # nixmax
 
-## Name
+## NAME
 
 nixmax - NIX virtual MAchine cross (x)
 
-## Library
+## LIBRARY
 
 Nix library with [flakes](https://nixos.wiki/wiki/Flakes) support.
 
-## Synopsis
+## SYNOPSIS
 
 In your `flake.nix`:
 
@@ -62,7 +62,7 @@ nixmax.lib.nixmax-alpine-riscv64 :: {
 } -> Derivation
 ```
 
-## Description
+## DESCRIPTION
 
 nixmax is a [Nix flake](https://nixos.wiki/wiki/Flakes) library for testing
 cross compiled apps that need kernel features, while avoiding the expensive
@@ -94,7 +94,7 @@ therefore optimizes for cache hits, and you can get away with a small memory
 footprint because it is just a standard ISO which boots fast and needs
 little to run.
 
-## Parameters
+## PARAMETERS
 
 ### app
 
@@ -187,28 +187,28 @@ vmArch is the ISO's architecture.
 "x86_64"
 ```
 
-## Return Value
+## RETURN VALUE
 
 These functions return a
 [derivation](https://nix.dev/manual/nix/stable/language/derivations.html)
 which runs the test when realized. The derivation fails when the app fails
 to return a success status code.
 
-## Examples
+## EXAMPLES
 
 See [`flake.nix`](flake.nix).
 
-## Reporting Bugs
+## REPORTING BUGS
 
 Open a GitHub issue at
 [github.com/andrieee44/nixmax](https://github.com/andrieee44/nixmax/issues).
 
-## Copyright
+## COPYRIGHT
 
 See [`LICENSE`](LICENSE). Uses
 [AGPLv3 or later](https://www.gnu.org/licenses/agpl-3.0.html).
 
-## See Also
+## SEE ALSO
 
 - [Nix](https://nixos.org/)
 - [Nixpkgs](https://github.com/NixOS/nixpkgs)
