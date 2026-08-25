@@ -7,6 +7,9 @@
     shellcheck.enable = true;
     shfmt.enable = true;
 
+    # Link checker
+    lychee.enable = true;
+
     # Markdown
     markdownlint = {
       enable = true;

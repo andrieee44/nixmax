@@ -6,7 +6,7 @@ nixmax - NIX virtual MAchine cross (x)
 
 ## LIBRARY
 
-Nix library with [flakes](https://nixos.wiki/wiki/Flakes) support.
+Nix library with [flakes](https://wiki.nixos.org/wiki/Flakes) support.
 
 ## SYNOPSIS
 
@@ -16,55 +16,41 @@ In your `flake.nix`:
 inputs.nixmax.url = "github:andrieee44/nixmax";
 ```
 
-### nixmax.lib.nixmax
+### nixmax.legacyPackages."${system}".nixmax
 
 ```haskell
-nixmax.lib.nixmax :: {
-  app,
-  loginExpectScript,
-  pkgs,
-  preRunShellScript,
-  prompt,
-  qemuArgs,
-  qemuBin,
-  system,
-  vmArch,
+nixmax.legacyPackages."${system}".nixmax :: {
+  app :: String;
+  loginExpectScript :: String;
+  preRunShellScript :: String;
+  prompt :: String;
+  qemuArgs :: AttrSet;
+  qemuBin :: String;
+  vmArch :: String;
 } -> Derivation
 ```
 
-### nixmax.lib.nixmax-alpine-x86_64
+### nixmax.legacyPackages."${system}".nixmax-alpine-x86_64
 
 ```haskell
-nixmax.lib.nixmax-alpine-x86_64 :: {
-  app,
-  pkgs,
-  system,
-} -> Derivation
+nixmax.legacyPackages."${system}".nixmax-alpine-x86_64 :: String -> Derivation
 ```
 
-### nixmax.lib.nixmax-alpine-aarch64
+### nixmax.legacyPackages."${system}".nixmax-alpine-aarch64
 
 ```haskell
-nixmax.lib.nixmax-alpine-aarch64 :: {
-  app,
-  pkgs,
-  system,
-} -> Derivation
+nixmax.legacyPackages."${system}".nixmax-alpine-aarch64 :: String -> Derivation
 ```
 
-### nixmax.lib.nixmax-alpine-riscv64
+### nixmax.legacyPackages."${system}".nixmax-alpine-riscv64
 
 ```haskell
-nixmax.lib.nixmax-alpine-riscv64 :: {
-  app,
-  pkgs,
-  system,
-} -> Derivation
+nixmax.legacyPackages."${system}".nixmax-alpine-riscv64 :: String -> Derivation
 ```
 
 ## DESCRIPTION
 
-nixmax is a [Nix flake](https://nixos.wiki/wiki/Flakes) library for testing
+nixmax is a [Nix flake](https://wiki.nixos.org/wiki/Flakes) library for testing
 cross compiled apps that need kernel features, while avoiding the expensive
 cost of cross-compiling [QEMU](https://www.qemu.org/) and its dependencies
 ([`runNixOSTest`](https://noogle.dev/f/pkgs/testers/runNixOSTest/)), and
@@ -96,7 +82,7 @@ little to run.
 
 ## PARAMETERS
 
-### app
+### app :: String
 
 app is the path to run.
 
@@ -108,7 +94,7 @@ app is the path to run.
 lib.getExe pkgs.hello
 ```
 
-### loginExpectScript
+### loginExpectScript :: String
 
 loginExpectScript is the [Expect](https://core.tcl-lang.org/expect/index)
 snippet to run for logging in.
@@ -121,21 +107,13 @@ snippet to run for logging in.
 ''
 ```
 
-### pkgs
-
-pkgs is your [Nixpkgs](https://github.com/NixOS/nixpkgs) instance.
-
-```nix
-nixpkgs.legacyPackages.x86_64-linux
-```
-
-### preRunShellScript
+### preRunShellScript :: String
 
 preRunShellScript is an escape hatch shell script snippet that runs before
 starting [Expect](https://core.tcl-lang.org/expect/index) and
 [QEMU](https://www.qemu.org/). Use it when `qemuArgs` is not enough.
 
-### prompt
+### prompt :: String
 
 prompt is the expected string after logging in to the ISO, used by
 [Expect](https://core.tcl-lang.org/expect/index).
@@ -145,7 +123,7 @@ prompt is the expected string after logging in to the ISO, used by
 "localhost:~# "
 ```
 
-### qemuArgs
+### qemuArgs :: AttrSet
 
 qemuArgs is used to pass arguments to the
 [QEMU](https://www.qemu.org/docs/master/system/invocation.html) binary.
@@ -161,7 +139,7 @@ qemuArgs is used to pass arguments to the
 }
 ```
 
-### qemuBin
+### qemuBin :: String
 
 qemuBin is your [QEMU](https://www.qemu.org/) binary to be executed.
 
@@ -169,17 +147,7 @@ qemuBin is your [QEMU](https://www.qemu.org/) binary to be executed.
 "${pkgs.qemu}/bin/qemu-system-x86_64"
 ```
 
-### system
-
-system is your current
-[Nix system](https://nix.dev/manual/nix/stable/language/builtins.html#builtins-currentSystem)
-identifier.
-
-```nix
-builtins.currentSystem
-```
-
-### vmArch
+### vmArch :: String
 
 vmArch is the ISO's architecture.
 
@@ -196,7 +164,8 @@ to return a success status code.
 
 ## EXAMPLES
 
-See [`flake.nix`](flake.nix).
+See the `checks` attribute of
+[`x86_64.nix`](./modules/flake/nixmax/alpine/x86_64.nix).
 
 ## REPORTING BUGS
 
@@ -205,14 +174,14 @@ Open a GitHub issue at
 
 ## COPYRIGHT
 
-See [`LICENSE`](LICENSE). Uses
+See [`LICENSE`](./LICENSE). Uses
 [AGPLv3 or later](https://www.gnu.org/licenses/agpl-3.0.html).
 
 ## SEE ALSO
 
 - [Nix](https://nixos.org/)
 - [Nixpkgs](https://github.com/NixOS/nixpkgs)
-- [Nix flakes](https://nixos.wiki/wiki/Flakes)
+- [Nix flakes](https://wiki.nixos.org/wiki/Flakes)
 - [QEMU](https://www.qemu.org/)
 - [Expect](https://core.tcl-lang.org/expect/index)
 - [Lima](https://lima-vm.io/)

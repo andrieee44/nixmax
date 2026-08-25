@@ -48,19 +48,23 @@ let
     ${loginExpectScript}
 
     foreach cmd $commands {
-        expect "${prompt}"
-        send "$cmd\r"
+      expect "${prompt}"
+      send "$cmd\r"
 
-        expect "${prompt}"
-        send "echo ___NIXMAX_CMD_STATUS___=\$?\r"
-        expect {
-            -re {___NIXMAX_CMD_STATUS___=([0-9]+)} {
-              if {$expect_out(1,string) != "0"} {
-                exit 1
-              }
-            }
-            default { exit 1 }
+      expect "${prompt}"
+      send "echo ___NIXMAX_CMD_STATUS___=\$?\r"
+
+      expect {
+        -re {___NIXMAX_CMD_STATUS___=([0-9]+)} {
+          if {$expect_out(1,string) != "0"} {
+            exit 1
+          }
         }
+
+        default {
+          exit 1
+        }
+      }
     }
 
     send "poweroff -f\r"
