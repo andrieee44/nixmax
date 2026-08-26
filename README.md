@@ -179,10 +179,10 @@ See [`LICENSE`](./LICENSE). Uses
 
 ## SEE ALSO
 
+- [Expect](https://core.tcl-lang.org/expect/index)
+- [GitHub repository](https://github.com/andrieee44/nixmax)
+- [Lima](https://lima-vm.io/)
+- [Nix flakes](https://wiki.nixos.org/wiki/Flakes)
 - [Nix](https://nixos.org/)
 - [Nixpkgs](https://github.com/NixOS/nixpkgs)
-- [Nix flakes](https://wiki.nixos.org/wiki/Flakes)
 - [QEMU](https://www.qemu.org/)
-- [Expect](https://core.tcl-lang.org/expect/index)
-- [Lima](https://lima-vm.io/)
-- [GitHub repository](https://github.com/andrieee44/nixmax)
