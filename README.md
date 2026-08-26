@@ -165,7 +165,7 @@ to return a success status code.
 ## EXAMPLES
 
 See the `checks` attribute of
-[`x86_64.nix`](./modules/flake/nixmax/alpine/x86_64.nix).
+[`x86_64.nix`](./modules/nixmax/alpine/x86_64.nix).
 
 ## REPORTING BUGS
 
