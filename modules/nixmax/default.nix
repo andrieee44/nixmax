@@ -10,7 +10,7 @@
         qemuBin,
         vmArch,
       }:
-      pkgs.buildPackages.callPackage ../../../pkgs/nixmax {
+      pkgs.buildPackages.callPackage ./_src {
         inherit
           app
           loginExpectScript

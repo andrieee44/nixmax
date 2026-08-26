@@ -30,7 +30,7 @@
     nixfmt.enable = true;
     statix.enable = true;
 
-    flake-check = {
+    flake-checks = {
       enable = true;
       entry = ''nix flake check --all-systems "${config.git.root}"'';
       pass_filenames = false;
