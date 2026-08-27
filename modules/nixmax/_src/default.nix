@@ -72,6 +72,7 @@ let
 in
 buildPackages.runCommand "nixmax"
   {
+    meta.license = lib.licenses.agpl3Plus;
     nativeBuildInputs = [ buildPackages.expect ];
   }
   ''
